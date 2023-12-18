@@ -2,7 +2,8 @@ const LikeService = require("../services/LikeService");
 const RestResponse = require('../utility/RestResponse');
 const CommentController = require("./CommentController")
 const Log = require("../utility/Log");
-const escapeHtml = require('escape-html')
+const NodeCache = require('node-cache');
+const cache = new NodeCache();
 
 class LikeController {
 
@@ -141,26 +142,37 @@ class LikeController {
         let response = new RestResponse()
 
         try{
-            //Check if comment exists and continue appropriately
-            Log.inform("Checking if comment with ID: " + cid + " exists!")
-            let comCtl = new CommentController()
-            if(!comCtl.doesCommentExist(cid)){
-                let err = new Error("Cannot Find Comment with ID: " + cid);
-                this.handle404Error(res, err, "404 No Comment Found!")
-            }
-            Log.success("Comment found! Can proceed with the like.")
+            let dbRes;
+            
+            if(cache.has("LL-"+cid)){
+                Log.inform("Attempting to retreive comment likes for ", cid)
+                dbRes = cache.get("LL-" + cid)
+                Log.inform("Retreived like list from cache!")
+            }else{
+                //Check if comment exists and continue appropriately
+                Log.inform("Checking if comment with ID: " + cid + " exists!")
+                let comCtl = new CommentController()
+                if(!comCtl.doesCommentExist(cid)){
+                    let err = new Error("Cannot Find Comment with ID: " + cid);
+                    this.handle404Error(res, err, "404 No Comment Found!")
+                }
+                Log.success("Comment found! Can proceed with the like.")
 
-            Log.inform("Attempting to retreive comment likes for ", cid)
-            let dbRes = await this.likeService.retreiveCommentLikes(cid);
+                Log.inform("Attempting to retreive comment likes for ", cid)
+                dbRes = await this.likeService.retreiveCommentLikes(cid);
 
-            if(dbRes == null || dbRes == "undefined"){
-                let err = new Error("Something went wrong! Contact admin for information!");
-                return this.handle500Error(res, err, "Internal Server Error!");
-            }
+                if(dbRes == null || dbRes == "undefined"){
+                    let err = new Error("Something went wrong! Contact admin for information!");
+                    return this.handle500Error(res, err, "Internal Server Error!");
+                }
 
-            if(dbRes.length < 1){
-                let err = new Error("Cannot find any Like records!");
-                return this.handle404Error(res, err, "Internal Server Error!");
+                if(dbRes.length < 1){
+                    let err = new Error("Cannot find any Like records!");
+                    return this.handle404Error(res, err, "Internal Server Error!");
+                }
+
+                Log.inform("Caching Likes list!")
+                dbRes = cache.set("LL-" + cid, dbRes, 3600)
             }
 
             response.status = 200;

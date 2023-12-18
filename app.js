@@ -3,9 +3,10 @@ let express = require('express');
 let path = require('path');
 let cookieParser = require('cookie-parser');
 let logger = require('morgan');
+const hpp = require('hpp');
+const helmet = require("helmet");
 
 let indexRouter = require('./routes/index');
-// let usersRouter = require('./routes/users');
 let commentRouterV1 = require('./routes/v1/comments/commentsApi');
 let likesRouterV1 = require('./routes/v1/likes/likesApi');
 
@@ -16,15 +17,17 @@ let app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+//Setting up middleware
 app.use(logger(process.env.LOG_LEVEL));
-app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: "1kb"}));
 app.use(express.json({limit: "5kb"}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(hpp());
+app.use(helmet()); // Add various HTTP headers
+app.use(helmet.hidePoweredBy({ setTo: 'PHP 4.2.0' }));
 
 app.use('/', indexRouter);
-// app.use('/users', usersRouter);
 app.use('/api/v1/comment', commentRouterV1)
 app.use('/api/v1/like', likesRouterV1)
 

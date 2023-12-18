@@ -18,28 +18,28 @@ router.use(basicAuth({
  * This endpoint is responsible for creating a new comment
  */
 router.post("/create", async (req, res) => {
-    return commentController.registerComment(req, res)
+    return await commentController.registerComment(req, res)
 })
 
 /**
  * This endpoint is responsible for creating a new reply
  */
 router.post("/reply", async (req, res) => {
-    return commentController.registerComment(req, res)
+    return await commentController.registerComment(req, res)
 })
 
 /**
  * This endpoint is responsible for updating a existing comment
  */
 router.put("/update/:cid", async (req, res) => {
-    return commentController.updateComment(req, res)
+    return await commentController.updateComment(req, res)
 })
 
 /**
  * This endpoint is responsible for deleting a existing comment
  */
 router.delete("/delete", async (req, res) => {
-    return commentController.deleteComment(req, res)
+    return await commentController.deleteComment(req, res)
 })
 
 
@@ -62,7 +62,7 @@ router.get("/user/:id", async (req, res) => {
  * This endpoint is responsible for retreiving all comments of a specified post.    
  */
 router.get("/comments/:pid", async (req, res) => {
-    return commentController.getComments(req, res)
+    return await commentController.getComments(req, res)
 })
 
 module.exports = router;
