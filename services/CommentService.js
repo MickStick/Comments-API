@@ -162,7 +162,7 @@ class CommentService {
             handleError("Error retreiving Comment with ID: " + id +  " from DB!");
         }
 
-        return resData[0];
+        return resData;
     }
 
     /**
@@ -186,7 +186,7 @@ class CommentService {
             handleError("Error retreiving Comment with ID: " + id +  " from DB!");
         }
 
-        return resData[0];
+        return resData;
     }
 }
 

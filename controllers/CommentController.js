@@ -142,7 +142,7 @@
             try{
                 let dbRes = await this.commentServcie.getComment(id)
 
-                if(dbRes == null || dbRes == "undefined" || !dbRes){
+                if(dbRes == null || dbRes == "undefined" || dbRes.length < 1){
                     return false;
                 }
 
@@ -174,7 +174,7 @@
             try{
                 let dbRes = await this.commentServcie.getPost(id)
 
-                if(dbRes == null || dbRes == "undefined" || !dbRes){
+                if(dbRes == null || dbRes == "undefined" || dbRes.length < 1){
                     return false;
                 }
 
