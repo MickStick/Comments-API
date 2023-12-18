@@ -352,9 +352,66 @@ Example Request Body:
 }
 ```
 
+Example Response Body:
+
+<u>Successful Response (HTTP Status Code: 200)</u>
+
+```json
+{
+  "status": 200,
+  "state": "success",
+  "message": "Like added successfully",
+  "body": {
+    "id": 123,
+    "cid": 456,
+    "pid": 789,
+    "status": 1,
+    "createdAt": "2023-12-17T12:00:00Z",
+    "updatedAt": "2023-12-17T12:00:00Z"
+  },
+  "err": null
+}
+```
+
+<u>Error Response (HTTP Status Code: 500)</u>
+
+```json
+{
+  "status": 500,
+  "state": "failure",
+  "message": "Comment not liked",
+  "body": null,
+  "err": {
+    "message": "Internal server error",
+    "err": {}
+  }
+}
+```
+
+
+<u>Error Response (HTTP Status Code: 404)</u>
+
+```json
+{
+  "status": 404,
+  "state": "failure",
+  "message": "Comment not found",
+  "body": null,
+  "err": {
+    "message": "Comment with ID 456 not found",
+    "err": {}
+  }
+}
+```
+
 #### Delete a Like (`/api/v1/like/delete/:id`)
 
 The `/delete/:id` endpoint allows users to remove a specific like record by providing the like ID (`:id`) in the URL path. Sending a DELETE request to `/api/v1/like/delete/:id` deletes the corresponding like record.
+
+Example Request:
+```plaintext
+DELETE /api/v1/like/delete/123
+```
 
 #### Retrieve Likes by Comment ID (`/api/v1/like/likes/cid`)
 
