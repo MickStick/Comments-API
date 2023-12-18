@@ -92,6 +92,7 @@ class CommentService {
      * This is a method that, using the sequelize Comments model, should get a list of
      * Comments objects/records for a specific user
      * For testing purposes only
+     * @param {Number} id 
      * @returns {Comments} Response Object
      */
     async retreiveUserCommentsList(id) {
@@ -114,26 +115,10 @@ class CommentService {
      * This is a method that, using the sequelize Comments model, should get a list of
      * Comments objects/records for a specific post. Each comment record should include 
      * a list of replies and a count of likes
+     * @param {Number} id 
      * @returns {Comments} Response Object
      */
      async retreivePostComments(id) {
-        /**
-         * The Query should follow this:
-         *  SELECT Suppliers.SupplierID, SupplierName, (SELECT CONCAT('[',
-            GROUP_CONCAT(DISTINCT(
-            JSON_OBJECT("SupplierID", Suppliers.SupplierID, "SupplierName", Suppliers.SupplierName))), ']') 
-            FROM Suppliers Where Suppliers.Country = "Germany")
-            AS GERMS, (SELECT COUNT(ProductID) FROM Products WHERE Suppliers.SupplierID = Products.SupplierID)
-            AS NumberOfProducts
-            FROM Suppliers
-            WHERE Suppliers.Country = "USA";
-         */
-        // const resData = await Comments.findAll({
-        //     where: {
-        //         id: id,
-        //         status: 1 | 0
-        //     }
-        // })
 
         let queryStr = "SELECT *, "
         + "(SELECT CONCAT('[',"
@@ -156,6 +141,52 @@ class CommentService {
         }
 
         return resData;
+    }
+
+
+     /**
+     * This is a method that, using the sequelize Comments model, should get a specific
+     * Comments object/record.
+     * @param {Number} id 
+     * @returns {Comments} Response Object
+     */
+    async getComment(id){
+        const resData = await Comments.findAll({
+            where: {
+                id: id,
+                status: 1
+            }
+        })
+
+        if (resData == null || resData == "undefined") {
+            handleError("Error retreiving Comment with ID: " + id +  " from DB!");
+        }
+
+        return resData[0];
+    }
+
+    /**
+     * This is a method that, using the sequelize Comments model, should get a specific
+     * Comments object/record.
+     * @param {Number} id 
+     * @returns {Post} Response Object
+     */
+    async getPost(id){
+        
+        // const resData = await Post.findAll({
+        //     where: {
+        //         id: id,
+        //         status: 1
+        //     }
+        // })
+
+        const resData = id > 0 ? [{ id: id}] : []
+
+        if (resData == null || resData == "undefined") {
+            handleError("Error retreiving Comment with ID: " + id +  " from DB!");
+        }
+
+        return resData[0];
     }
 }
 

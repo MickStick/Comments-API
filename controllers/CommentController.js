@@ -123,6 +123,81 @@
             return res.json(response)
         }
 
+        /**
+         * This is a checker method to check if a comment exists or not.
+         * @param {Number} id - Comment ID 
+         * @returns {Boolean} - If the comment exists or not
+         */
+        async doesCommentExist(id){
+            let numReg = /[0-9]/;
+
+            //validate Comment ID
+            Log.inform("Valiating Comment ID!");
+            if(id == "undefined" 
+            || id == null 
+            || !numReg.test(id)){
+                throw new Error("Invalid Comment ID! Comment ID must be a number!");
+            }
+
+            try{
+                let dbRes = await this.commentServcie.getComment(id)
+
+                if(dbRes == null || dbRes == "undefined" || !dbRes){
+                    return false;
+                }
+
+                return true;
+
+            }catch(err){
+                Log.error(err.message)
+                throw new Error("There was an issue trying to find Comment with ID: " + id)
+            }
+
+        } 
+
+        /**
+         * This is a checker method to check if a post exists or not.
+         * @param {Number} id - Post ID 
+         * @returns {Boolean} - If the post exists or not
+         */
+        async doesPostExist(id){
+            let numReg = /[0-9]/;
+
+            //validate Post ID
+            Log.inform("Valiating Post ID!");
+            if(id == "undefined" 
+            || id == null 
+            || !numReg.test(id)){
+                throw new Error("Invalid Post ID! Post ID must be a number!");
+            }
+
+            try{
+                let dbRes = await this.commentServcie.getPost(id)
+
+                if(dbRes == null || dbRes == "undefined" || !dbRes){
+                    return false;
+                }
+
+                return true;
+
+            }catch(err){
+                Log.error(err.message)
+                throw new Error("There was an issue trying to find Post with ID: " + id)
+            }
+
+        } 
+
+        /**
+         * This is the controller method resposible for registering a comment into the database.
+         * A ResponseObject is returned with status 200 and the comment object, if successful.
+         * A ResponseObject is returned with status 404 and a message, if the post or replyTo 
+         * comment doesn't exist.
+         * A ResponseObject is returned with status 500 and a message, if an issue was 
+         * encountered. 
+         * @param {Request} req - Express Request Object
+         * @param {Response} res - Express Response Object
+         * @returns {Response} res - Express Response Object
+         */
         async registerComment(req, res){
             let {body} = req;
 
@@ -137,6 +212,26 @@
 
             try{
                 body.status = 1;
+
+                Log.inform("Checking if Post with ID:" + body.pid + " exists")
+                //Check if post exists and continue appropriately
+                if(!this.doesPostExist(body.pid)){
+                    let err = new Error("Cannot Find Post with ID: " + body.pid);
+                    this.handle404Error(res, err, "404 No Comment Found!")
+                }
+                Log.success("Comment found! Can proceed with the reply.")
+
+                if(body.replyTo != null){
+                    Log.inform("Checking if comment with ID: " + body.replyTo + " exists!")
+
+                    //Check if comment exists and continue appropriately
+                    if(!this.doesCommentExist(body.replyTo)){
+                        let err = new Error("Cannot Find Comment with ID: " + body.replyTo);
+                        this.handle404Error(res, err, "404 No Comment Found!")
+                    }
+                    Log.success("Comment found! Can proceed with the reply.")
+                }                
+
                 Log.inform("Attempting to add comment.")
                 let dbRes = await this.commentServcie.addCommentData(body);
 
@@ -159,6 +254,17 @@
             
         }
 
+        /**
+         * This is the controller method resposible for upating a comment in the database by id.
+         * A ResponseObject is returned with status 200 and the comment object, if successful.
+         * A ResponseObject is returned with status 404 and a message, if the comment, post or 
+         * replyTo comment doesn't exist.
+         * A ResponseObject is returned with status 500 and a message, if an issue was 
+         * encountered.  
+         * @param {Request} req - Express Request Object
+         * @param {Response} res - Express Response Object
+         * @returns {Response} res - Express Response Object
+         */
         async updateComment(req, res){
             let {body} = req;
             let {cid} = req.params;
@@ -174,8 +280,34 @@
 
             try{
                 if (body.status) delete body.status;
-                //TODO
+
+                Log.inform("Checking if Post with ID:" + body.pid + " exists")
                 //Check if post exists and continue appropriately
+                if(!this.doesPostExist(body.pid)){
+                    let err = new Error("Cannot Find Post with ID: " + body.pid);
+                    this.handle404Error(res, err, "404 No Post Found!")
+                }
+                Log.success("Post found! Can proceed with the comment.")
+
+                if(body.replyTo != null){
+                    Log.inform("Checking if comment with ID: " + body.replyTo + " exists!")
+
+                    //Check if reply exists and continue appropriately
+                    if(!this.doesCommentExist(body.replyTo)){
+                        let err = new Error("Cannot Find Comment with ID: " + body.replyTo);
+                        this.handle404Error(res, err, "404 No Comment Found!")
+                    }
+                    Log.success("Comment found! Can proceed with the reply.")
+                }
+
+                //Check if comment exists and continue appropriately
+                Log.inform("Checking if comment with ID: " + cid + " exists!")
+                if(!this.doesCommentExist(cid)){
+                    let err = new Error("Cannot Find Comment with ID: " + cid);
+                    this.handle404Error(res, err, "404 No Comment Found!")
+                }
+                Log.success("Comment found! Can proceed with the update.")
+
                 Log.inform("Attempting to update comment.")
                 let dbRes = await this.commentServcie.updateComment(cid, body);
 
@@ -198,6 +330,18 @@
             
         }
 
+        /**
+         * This is the controller method resposible for retreiving comments on a specific post.
+         * Each comment has a string vaue of a list of replies related to that comment.
+         * A ResponseObject is returned with status 200 and the list of comments, if successful.
+         * A ResponseObject is returned with status 404 and a message, if the comment, post or 
+         * replyTo comment doesn't exist.
+         * A ResponseObject is returned with status 500 and a message, if an issue was 
+         * encountered. 
+         * @param {Request} req - Express Request Object
+         * @param {Response} res - Express Response Object
+         * @returns {Response} res - Express Response Object
+         */
         async getComments(req, res){
 
             let {pid} = req.params;
@@ -215,7 +359,7 @@
 
                 if(dbRes.length < 1){
                     let err = new Error("Cannot find any Comment records!");
-                    return this.handle404Error(res, err, "Internal Server Error!");
+                    return this.handle404Error(res, err, "404 Comment Not Found!");
                 }
 
                 response.status = 200;
@@ -232,6 +376,17 @@
 
         }
 
+        /**
+         * This is the controller method resposible for retreiving comments on a specific post.
+         * Each comment has a string vaue of a list of replies related to that comment.
+         * A ResponseObject is returned with status 200 and a message, if successful.
+         * A ResponseObject is returned with status 404 and a message, if the comment doesn't exist.
+         * A ResponseObject is returned with status 500 and a message, if an issue was 
+         * encountered. 
+         * @param {Request} req - Express Request Object
+         * @param {Response} res - Express Response Object
+         * @returns {Response} res - Express Response Object
+         */
         async deleteComment(req, res){
             let {pid} = req.params;
 

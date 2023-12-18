@@ -49,9 +49,32 @@ class LikeService {
     async retreiveCommentLikes(id) {
         if(process.env.NODE_ENV != "development") handleError("Sorry, I can't do that!");
 
-        const resData = await Like.findAll({
+        const resData = await Likes.findAll({
             where: {
                 cid: id,
+                status: 1
+            }
+        })
+
+        if (resData == null || resData == "undefined") {
+            handleError("Error retreiving list of Comments from DB!");
+        }
+
+        return resData;
+    }
+
+    /**
+     * This is a method that, using the sequelize Likes model, should get a list of
+     * Likes objects/records for a specific comment
+     * For testing purposes only
+     * @returns {Comments} Response Object
+     */
+    async getLike(id) {
+        if(process.env.NODE_ENV != "development") handleError("Sorry, I can't do that!");
+
+        const resData = await Likes.findAll({
+            where: {
+                id: id,
                 status: 1
             }
         })

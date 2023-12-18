@@ -1,5 +1,6 @@
 const LikeService = require("../services/LikeService");
 const RestResponse = require('../utility/RestResponse');
+const CommentController = require("./CommentController")
 const Log = require("../utility/Log");
 const escapeHtml = require('escape-html')
 
@@ -100,6 +101,16 @@ class LikeController {
         try{
             body.status = 0;
             //TODO
+
+            //Check if comment exists and continue appropriately
+            Log.inform("Checking if comment with ID: " + body.cid + " exists!")
+            let comCtl = new CommentController()
+            if(!comCtl.doesCommentExist(body.cid)){
+                let err = new Error("Cannot Find Comment with ID: " + body.cid);
+                this.handle404Error(res, err, "404 No Comment Found!")
+            }
+            Log.success("Comment found! Can proceed with the like.")
+
             //Ensure that this like isn't already there an active
             Log.inform("Attempting to add comment like.")
             let dbRes = await this.likeService.addLike(body);
@@ -130,6 +141,15 @@ class LikeController {
         let response = new RestResponse()
 
         try{
+            //Check if comment exists and continue appropriately
+            Log.inform("Checking if comment with ID: " + cid + " exists!")
+            let comCtl = new CommentController()
+            if(!comCtl.doesCommentExist(cid)){
+                let err = new Error("Cannot Find Comment with ID: " + cid);
+                this.handle404Error(res, err, "404 No Comment Found!")
+            }
+            Log.success("Comment found! Can proceed with the like.")
+
             Log.inform("Attempting to retreive comment likes for ", cid)
             let dbRes = await this.likeService.retreiveCommentLikes(cid);
 
