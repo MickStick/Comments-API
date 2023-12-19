@@ -1,6 +1,6 @@
 {
   "name": "comments-api",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
@@ -27,5 +27,30 @@
   },
   "devDependencies": {
     "jest": "^29.7.0"
-  }
+  },
+  "description": "Welcome to the Comments-API REST API! This API forms an integral part of a larger system centered around managing posts. It specializes in facilitating the creation, management, and interaction with comments, replies, and likes. Built on Node.js, Express, Sequelize interfacing with MySQL, this API employs basic auth Authorization across all its endpoints.",
+  "main": "app.js",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MickStick/comments-api.git"
+  },
+  "keywords": [
+    "Node.js",
+    "Express.js",
+    "JavaScript",
+    "MySQL",
+    "Sequelize.js",
+    "REST",
+    "API",
+    "Comments-API"
+  ],
+  "author": "Mikhail Shaw",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MickStick/comments-api/issues"
+  },
+  "homepage": "https://github.com/MickStick/comments-api#readme"
 }
