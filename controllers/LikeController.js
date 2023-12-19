@@ -59,7 +59,7 @@ class LikeController {
         response.message = msg;
         response.err = {
             message: err.message,
-            err: err
+            err: err.name.toLowerCase().includes("sequelize" || "sql" || "query") ? new Error(err.message) : err
         };
         return res.json(response)
     }
@@ -106,7 +106,7 @@ class LikeController {
             //Check if comment exists and continue appropriately
             Log.inform("Checking if comment with ID: " + body.cid + " exists!")
             let comCtl = new CommentController()
-            if(!comCtl.doesCommentExist(body.cid)){
+            if(await !comCtl.doesCommentExist(body.cid)){
                 let err = new Error("Cannot Find Comment with ID: " + body.cid);
                 this.handle404Error(res, err, "404 No Comment Found!")
             }
@@ -152,7 +152,7 @@ class LikeController {
                 //Check if comment exists and continue appropriately
                 Log.inform("Checking if comment with ID: " + cid + " exists!")
                 let comCtl = new CommentController()
-                if(!comCtl.doesCommentExist(cid)){
+                if(await !comCtl.doesCommentExist(cid)){
                     let err = new Error("Cannot Find Comment with ID: " + cid);
                     this.handle404Error(res, err, "404 No Comment Found!")
                 }

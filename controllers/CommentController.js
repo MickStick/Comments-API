@@ -42,6 +42,17 @@ class CommentController {
         let strReg = /[a-zA-Z]/;
         let numReg = /[0-9]/;
 
+        if(body.cid){
+            //validate Comment ID
+            Log.inform("Valiating Comment ID!");
+            if (body.uid == "undefined"
+                || body.uid == null
+                || !numReg.test(body.uid)) {
+                errList.push("Invalid User ID! User ID must be a number!");
+            }
+        }
+        
+
         //validate User ID
         Log.inform("Valiating Comment User ID!");
         if (body.uid == "undefined"
@@ -61,9 +72,13 @@ class CommentController {
         if (body["replyTo"]) {
             //validate replyTo
             Log.inform("Valiating Comment [replyTo]");
-            if (body.replyTo == "undefined"
-                || (body.replyTo != null && !numReg.test(body.replyTo))) {
+            console.log(typeof body.replyTo)
+            if (body.replyTo != null
+                && !numReg.test(body.replyTo)
+                && String(body.replyTo).trim() != "null") {
                 errList.push("Invalid [replyTo]! [replyTo] must be a number or null!");
+            }else if(String(body.replyTo).trim() === "null"){
+                body.replyTo = null;
             }
         }
 
@@ -97,7 +112,7 @@ class CommentController {
         response.message = msg;
         response.err = {
             message: err.message,
-            err: err
+            err: err.name.toLowerCase().includes("sequelize" || "sql" || "query") ? new Error(err.message) : err
         };
         return res.json(response)
     }
@@ -143,13 +158,15 @@ class CommentController {
         if (id == "undefined"
             || id == null
             || !numReg.test(id)) {
-            throw new Error("Invalid Comment ID! Comment ID must be a number!");
+            Log.error("Invalid Comment ID! Comment ID must be a number!");
+            return false;
         }
 
         try {
             let dbRes = await this.commentServcie.getComment(id)
 
             if (dbRes == null || dbRes == "undefined" || dbRes.length < 1) {
+                Log.warn("Comment doesn't exist")
                 return false;
             }
 
@@ -158,7 +175,8 @@ class CommentController {
 
         } catch (err) {
             Log.error(err.message)
-            throw new Error("There was an issue trying to find Comment with ID: " + id)
+            Log.error("There was an issue trying to find Comment with ID: " + id)
+            return false;
         }
 
     }
@@ -181,7 +199,8 @@ class CommentController {
         if (id == "undefined"
             || id == null
             || !numReg.test(id)) {
-            throw new Error("Invalid Post ID! Post ID must be a number!");
+            Log.error("Invalid Post ID! Post ID must be a number!");
+            return false;
         }
 
         try {
@@ -196,7 +215,8 @@ class CommentController {
 
         } catch (err) {
             Log.error(err.message)
-            throw new Error("There was an issue trying to find Post with ID: " + id)
+            Log.error("There was an issue trying to find Post with ID: " + id)
+            return false;
         }
 
     }
@@ -229,17 +249,17 @@ class CommentController {
 
             Log.inform("Checking if Post with ID:" + body.pid + " exists")
             //Check if post exists and continue appropriately
-            if (!this.doesPostExist(body.pid)) {
+            if (await !this.doesPostExist(body.pid)) {
                 let err = new Error("Cannot Find Post with ID: " + body.pid);
                 this.handle404Error(res, err, "404 No Comment Found!")
             }
             Log.success("Comment found! Can proceed with the reply.")
 
-            if (body.replyTo != null) {
+            if (body.replyTo != null || body.replyTo != "null") {
                 Log.inform("Checking if comment with ID: " + body.replyTo + " exists!")
 
                 //Check if comment exists and continue appropriately
-                if (!this.doesCommentExist(body.replyTo)) {
+                if (await !this.doesCommentExist(body.replyTo)) {
                     let err = new Error("Cannot Find Comment with ID: " + body.replyTo);
                     this.handle404Error(res, err, "404 No Comment Found!")
                 }
@@ -263,6 +283,7 @@ class CommentController {
             return res.json(response);
 
         } catch (err) {
+            Log.error(err.message)
             return this.handle500Error(res, err, "Internal Server Error!");
         }
 
@@ -297,17 +318,17 @@ class CommentController {
 
             Log.inform("Checking if Post with ID:" + body.pid + " exists")
             //Check if post exists and continue appropriately
-            if (!this.doesPostExist(body.pid)) {
+            if (await !this.doesPostExist(body.pid)) {
                 let err = new Error("Cannot Find Post with ID: " + body.pid);
                 this.handle404Error(res, err, "404 No Post Found!")
             }
             Log.success("Post found! Can proceed with the comment.")
 
-            if (body.replyTo != null) {
+            if (body.replyTo != null || body.replyTo != "null") {
                 Log.inform("Checking if comment with ID: " + body.replyTo + " exists!")
 
                 //Check if reply exists and continue appropriately
-                if (!this.doesCommentExist(body.replyTo)) {
+                if (await !this.doesCommentExist(body.replyTo)) {
                     let err = new Error("Cannot Find Comment with ID: " + body.replyTo);
                     this.handle404Error(res, err, "404 No Comment Found!")
                 }
@@ -316,7 +337,7 @@ class CommentController {
 
             //Check if comment exists and continue appropriately
             Log.inform("Checking if comment with ID: " + cid + " exists!")
-            if (!this.doesCommentExist(cid)) {
+            if (await !this.doesCommentExist(cid)) {
                 let err = new Error("Cannot Find Comment with ID: " + cid);
                 this.handle404Error(res, err, "404 No Comment Found!")
             }
@@ -339,6 +360,7 @@ class CommentController {
             return res.json(response);
 
         } catch (err) {
+            Log.error(err.message)
             return this.handle500Error(res, err, "Internal Server Error!");
         }
 
@@ -366,8 +388,8 @@ class CommentController {
             
             Log.inform("Attempting to retreive comments for post ", pid)
             let dbRes;
-            if(cache.has("CL-" + id)){
-                dbRes = cache.get("CL-" + id)
+            if(cache.has("CL-" + pid)){
+                dbRes = cache.get("CL-" + pid)
                 Log.inform("Retreived Comments list from cache!")
             }else{
                 
@@ -384,7 +406,7 @@ class CommentController {
                 }
 
                 Log.inform("Caching Comments list!")
-                cache.set("CL-" + id, dbRes, 3600)
+                cache.set("CL-" + pid, dbRes, 3600)
             }
 
             response.status = 200;
@@ -396,6 +418,7 @@ class CommentController {
             return res.json(response);
 
         } catch (err) {
+            Log.error(err.message)
             return this.handle500Error(res, err, "Internal Server Error!");
         }
 
@@ -413,34 +436,37 @@ class CommentController {
      * @returns {Response} res - Express Response Object
      */
     async deleteComment(req, res) {
-        let { pid } = req.params;
+        let { cid } = req.params;
 
         let response = new RestResponse()
 
-        if (errMsg.length > 0) {
-            let err = new Error(JSON.stringify(errMsg))
-            return this.handle500Error(res, err, "Validation Error!");
-        }
-
         try {
-            body.status = 0;
-            Log.inform("Attempting to add comment.")
-            let dbRes = await this.commentServcie.deleteComment(pid);
+
+            if(await !this.doesCommentExist(cid) == false){
+                let err = new Error("Cannot find any Comment record!");
+                return this.handle404Error(res, err, "404 Comment Not Found!");
+            }
+            
+            Log.inform("Attempting to delete comment.")
+            let dbRes = await this.commentServcie.deleteComment(cid);
 
             if (dbRes == null || dbRes == "undefined") {
                 let err = new Error("Something went wrong! Contact admin for information!");
                 return this.handle500Error(res, err, "Internal Server Error!");
             }
 
+            cache.del("comment-" + cid)
+
             response.status = 200;
             response.state = "success";
-            response.message = "Comment has been added successfully!";
-            response.body = dbRes;
-            Log.success("Comment has been added successfully!");
+            response.message = "Comment has been delete successfully!";
+            response.body = null;
+            Log.success("Comment has been deleted successfully!");
             res.status(response.status);
             return res.json(response);
 
         } catch (err) {
+            Log.error(err.message)
             return this.handle500Error(res, err, "Internal Server Error!");
         }
 

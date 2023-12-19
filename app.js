@@ -19,7 +19,7 @@ app.set('view engine', 'jade');
 
 //Setting up middleware
 app.use(logger(process.env.LOG_LEVEL));
-app.use(express.urlencoded({ extended: true, limit: "1kb"}));
+// app.use(express.urlencoded({ extended: true, limit: "1kb"}));
 app.use(express.json({limit: "5kb"}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));

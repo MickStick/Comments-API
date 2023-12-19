@@ -38,7 +38,7 @@ router.put("/update/:cid", async (req, res) => {
 /**
  * This endpoint is responsible for deleting a existing comment
  */
-router.delete("/delete", async (req, res) => {
+router.delete("/delete/:cid", async (req, res) => {
     return await commentController.deleteComment(req, res)
 })
 
