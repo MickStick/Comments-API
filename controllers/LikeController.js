@@ -130,6 +130,7 @@ class LikeController {
             return res.json(response);
             
         }catch(err){
+            Log.error(err.message)
             return this.handle500Error(res, err, "Internal Server Error!");
         }
         
@@ -184,6 +185,7 @@ class LikeController {
             return res.json(response);
 
         }catch(err){
+            Log.error(err.message)
             return this.handle500Error(res, err, "Internal Server Error!");
         }
 
@@ -212,12 +214,13 @@ class LikeController {
             response.status = 200;
             response.state = "success";
             response.message = "Like has been added successfully!";
-            response.body = dbRes;
+            response.body = null;
             Log.success("Like has been added successfully!");
             res.status(response.status);
             return res.json(response);
             
         }catch(err){
+            Log.error(err.message)
             return this.handle500Error(res, err, "Internal Server Error!");
         }
         
