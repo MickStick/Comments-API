@@ -95,7 +95,7 @@ class CommentService {
      * @param {Number} id 
      * @returns {Comments} Response Object
      */
-    async retreiveUserCommentsList(id) {
+    async retrieveUserCommentsList(id) {
         if(process.env.NODE_ENV != "development") handleError("Sorry, I can't do that!");
 
         const resData = await Comments.findAll({
@@ -118,7 +118,7 @@ class CommentService {
      * @param {Number} id 
      * @returns {Comments} Response Object
      */
-     async retreivePostComments(id) {
+     async retrievePostComments(id) {
 
         let queryStr = "SELECT *, "
         + "(SELECT CONCAT('[',"

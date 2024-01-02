@@ -146,9 +146,9 @@ class LikeController {
             let dbRes;
             
             if(cache.has("LL-"+cid)){
-                Log.inform("Attempting to retreive comment likes for ", cid)
+                Log.inform("Attempting to retrieve comment likes for ", cid)
                 dbRes = cache.get("LL-" + cid)
-                Log.inform("Retreived like list from cache!")
+                Log.inform("Retrieved like list from cache!")
             }else{
                 //Check if comment exists and continue appropriately
                 Log.inform("Checking if comment with ID: " + cid + " exists!")
@@ -159,8 +159,8 @@ class LikeController {
                 }
                 Log.success("Comment found! Can proceed with the like.")
 
-                Log.inform("Attempting to retreive comment likes for ", cid)
-                dbRes = await this.likeService.retreiveCommentLikes(cid);
+                Log.inform("Attempting to retrieve comment likes for ", cid)
+                dbRes = await this.likeService.retrieveCommentLikes(cid);
 
                 if(dbRes == null || dbRes == "undefined"){
                     let err = new Error("Something went wrong! Contact admin for information!");
@@ -169,7 +169,7 @@ class LikeController {
 
                 if(dbRes.length < 1){
                     let err = new Error("Cannot find any Like records!");
-                    return this.handle404Error(res, err, "Internal Server Error!");
+                    return this.handle404Error(res, err, "404 No Likes Found!");
                 }
 
                 Log.inform("Caching Likes list!")
@@ -178,9 +178,9 @@ class LikeController {
 
             response.status = 200;
             response.state = "success";
-            response.message = "Likes have been retreived!";
+            response.message = "Likes have been retrieved!";
             response.body = dbRes;
-            Log.success("Likes have been retreived!");
+            Log.success("Likes have been retrieved!");
             res.status(response.status);
             return res.json(response);
 

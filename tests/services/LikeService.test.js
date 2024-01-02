@@ -7,7 +7,7 @@ const dash = () => {
 jest.mock('../../services/LikeService', () => {
     return jest.fn().mockImplementation(() => ({  
         addLike: jest.fn((body) => {if(body instanceof Object){return {}} dash()}),
-        retreiveCommentLikes: jest.fn((id) => {if(/[0-9]/.test(id)){return []} dash()}),
+        retrieveCommentLikes: jest.fn((id) => {if(/[0-9]/.test(id)){return []} dash()}),
         deleteLike: jest.fn((id) => {if(/[0-9]/.test(id)){return {}} dash()}),
         handleError: jest.fn((message) => {dash()}),
     }))
@@ -37,13 +37,13 @@ describe('Testing Like Service!', () => {
     })
 
     it('Should retrieve post likes list', () => {
-        let res = likeService.retreiveCommentLikes(1)
+        let res = likeService.retrieveCommentLikes(1)
         expect(res).toBeDefined()
         expect(res instanceof Array).toBeTruthy()
     })
 
     it('Should throw error on post likes', () => {
-        expect(() => likeService.retreiveCommentLikes("invalid")).toThrow("Something went wrong! Contact admin for information!")
+        expect(() => likeService.retrieveCommentLikes("invalid")).toThrow("Something went wrong! Contact admin for information!")
     })
 
     it('Should throw an error', () => {

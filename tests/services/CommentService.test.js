@@ -13,7 +13,7 @@ jest.mock('../../services/CommentService', () => {
         addCommentData : jest.fn((body) => {if(body instanceof Object){return {}} dash()}),
         updateComment : jest.fn((id, body) => {if(/[0-9]/.test(id) && body instanceof Object){ return {}} dash()}),
         deleteComment : jest.fn((id) => {if(/[0-9]/.test(id)){return {}} dash()}),
-        retreivePostComments : jest.fn((id) => {if(/[0-9]/.test(id)){return []} dash()}),
+        retrievePostComments : jest.fn((id) => {if(/[0-9]/.test(id)){return []} dash()}),
         handleError: jest.fn((message) => {dash()}),
     }))
 })
@@ -52,13 +52,13 @@ describe('Testing Comment Service!', () => {
     })
 
     it('Should retrieve post comments list', () => {
-        let res = commentService.retreivePostComments(1)
+        let res = commentService.retrievePostComments(1)
         expect(res).toBeDefined()
         expect(res instanceof Array).toBeTruthy()
     })
 
     it('Should throw error on post comments', () => {
-        expect(() => commentService.retreivePostComments("invalid")).toThrow("Something went wrong! Contact admin for information!")
+        expect(() => commentService.retrievePostComments("invalid")).toThrow("Something went wrong! Contact admin for information!")
     })
 
     it('Should throw an error', () => {

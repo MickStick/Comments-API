@@ -386,14 +386,14 @@ class CommentController {
 
         try {
             
-            Log.inform("Attempting to retreive comments for post ", pid)
+            Log.inform("Attempting to retrieve comments for post ", pid)
             let dbRes;
             if(cache.has("CL-" + pid)){
                 dbRes = cache.get("CL-" + pid)
-                Log.inform("Retreived Comments list from cache!")
+                Log.inform("Retrieved Comments list from cache!")
             }else{
                 
-                dbRes = await this.commentServcie.retreivePostComments(pid);
+                dbRes = await this.commentServcie.retrievePostComments(pid);
 
                 if (dbRes == null || dbRes == "undefined") {
                     let err = new Error("Something went wrong! Contact admin for information!");
@@ -411,9 +411,9 @@ class CommentController {
 
             response.status = 200;
             response.state = "success";
-            response.message = "Comments have been retreived!";
+            response.message = "Comments have been retrieved!";
             response.body = dbRes;
-            Log.success("Comments have been retreived!");
+            Log.success("Comments have been retrieved!");
             res.status(response.status);
             return res.json(response);
 
@@ -442,10 +442,10 @@ class CommentController {
 
         try {
 
-            if(await !this.doesCommentExist(cid) == false){
-                let err = new Error("Cannot find any Comment record!");
-                return this.handle404Error(res, err, "404 Comment Not Found!");
-            }
+            // if(await !this.doesCommentExist(cid) == false){
+            //     let err = new Error("Cannot find any Comment record!");
+            //     return this.handle404Error(res, err, "404 Comment Not Found!");
+            // }
             
             Log.inform("Attempting to delete comment.")
             let dbRes = await this.commentServcie.deleteComment(cid);

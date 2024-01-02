@@ -46,7 +46,7 @@ class LikeService {
      * For testing purposes only
      * @returns {Comments} Response Object
      */
-    async retreiveCommentLikes(id) {
+    async retrieveCommentLikes(id) {
         if(process.env.NODE_ENV != "development") handleError("Sorry, I can't do that!");
 
         const resData = await Likes.findAll({

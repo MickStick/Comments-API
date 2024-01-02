@@ -17,7 +17,7 @@ router.use(basicAuth({
 /**
  * This endpoint is responsible for creating a new comment/reply like
  */
-router.post("/add", async (req, res) => {
+router.put("/add", async (req, res) => {
     return await likeController.registerLike(req, res)
 })
 
